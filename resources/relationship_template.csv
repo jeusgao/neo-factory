@@ -1,0 +1,2 @@
+a_label,a_properties,b_label,is_r_type,r_type,r_properties,conditions,output
+User,,Dept,Y,TEST,{ref:'测试'},a.USER_LOGIN_NAME='gaojinsong00' and b.DEPT_CODE='LR021201',CREATE_RELATIONSHIP

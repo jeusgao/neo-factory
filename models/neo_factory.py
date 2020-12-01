@@ -70,7 +70,7 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
     if b_label:
         if is_r_type in ['Y'] and not r_type:
             cy += '-[r]-'
-        else:
+        elif not r_type:
             cy += ','
         cy += f"(b:{b_label})"
     if conditions:

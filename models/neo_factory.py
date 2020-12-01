@@ -69,9 +69,11 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
         cy += f'-[r:{r_type}]-'
     if b_label:
         if is_r_type in ['Y'] and not r_type:
-            cy += '-[r]-'
+            cy += '-[r]'
         elif not r_type:
             cy += ','
+        else:
+            cy += '-'
         cy += f"(b:{b_label})"
     if conditions:
         cy += f" WHERE {conditions}"

@@ -109,7 +109,7 @@ def _update():
 
 def _match():
     a_label, a_properties, b_label, is_r_type, r_type, r_properties, conditions = _input_template(action='M')
-    output = st.multiselect('选择输出项(RETURN)', ['a: Start node', 'b: End node', 'r: Relationship'], default=['a: Start node'])
+    output = st.multiselect('选择输出项(RETURN)', ['a: Start node', 'b: End node', 'r: Relationship'])
     st.markdown('*[请至少选择一个输出项，输出项留空时默认输出所有元素]*')
     output = ','.join([o[0] for o in output])
     output = output if output else '*'

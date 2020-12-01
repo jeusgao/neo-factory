@@ -65,14 +65,20 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
         [str] -- [return a initiative cypher scripts before the return]
     '''
     cy = f"MATCH (a:{a_label})"
-    if r_type and output not in ['CREATE_RELATIONSHIP']:
-        cy += f'-[r:{r_type}]-'
-    if b_label:
-        if is_r_type in ['Y'] and not r_type:
-            cy += '-[r]-'
-        elif not r_type:
-            cy += ','
-        cy += f"(b:{b_label})"
+    if output not in ['CREATE_RELATIONSHIP']:
+        if is_r_type in ['Y']:
+            if r_type:
+                cy += f'-[r:{r_type}]-'
+            else:
+                cy += '-[r]-'
+            if b_label:
+                cy += f"(b:{b_label})"
+            else:
+                cy += '(b)'
+        else:
+            if b_label:
+                cy += f",(b:{b_label})"
+
     if conditions:
         cy += f" WHERE {conditions}"
 

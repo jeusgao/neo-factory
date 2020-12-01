@@ -19,7 +19,7 @@ def _update_commit(df):
     if len(df):
         for r in df.iterrows():
             _cypher = build_cypher(r[1])
-            st.success(f'!!!BOOM!!! {_cypher}')
+            st.markdown(f'\t!!!BOOM!!! {_cypher}')
             g.run(_cypher)
 
 
@@ -126,7 +126,7 @@ def _match():
     }, index=[0])
 
     _cypher = build_cypher(list(df.iterrows())[0][1], action='M')
-    st.success(f'!!!match BOOM!!! {_cypher}')
+    st.markdown(f'\t!!!match BOOM!!! {_cypher}')
 
     _submit = st.button('RUN')
     if _submit:

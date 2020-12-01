@@ -36,10 +36,13 @@ def _input_template(action='U'):
     # b_label = st.selectbox('End node label:', list(NEO_FIELDS.Node_labels))
     # r_type = st.selectbox('Relationship types', list(NEO_FIELDS.R_types))
     b_label = st.text_input('End node(Node B) label:')
-    is_r_type = st.radio('Need Relationship?:', ('N', 'Y'))
+    path_type = st.radio('Need Relationship?:', ('NONE', 'RELATION', 'Shortest', 'AllShortests'))
     r_type = None
-    if is_r_type == 'Y':
+    if path_type == 'RELATION':
         r_type = st.text_input('Relationship types:')
+    p_depth = 1
+    if path_type in ['Shortest', 'AllShortests']:
+        p_depth = st.slider('Path depth:', min_value=1, max_value=10, value=1, step=1)
     r_properties = None
     if action == 'U':
         r_properties = st.text_input('Relationship key-values properties, separate with comma:')
@@ -57,11 +60,11 @@ def _input_template(action='U'):
     b_label = f'{b_label}' if b_label else None
     r_type = f'{r_type}' if r_type else None
 
-    return a_label, a_properties, b_label, is_r_type, r_type, r_properties, conditions
+    return a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions
 
 
 def _line_update():
-    a_label, a_properties, b_label, is_r_type, r_type, r_properties, conditions = _input_template()
+    a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions = _input_template()
 
     output = st.selectbox('Return command', list(NEO_FIELDS.Outputs.keys()))
     output_param = st.text_input('command params:').replace(output, '')
@@ -72,7 +75,8 @@ def _line_update():
         'a_label': a_label,
         'a_properties': a_properties,
         'b_label': b_label,
-        'is_r_type': is_r_type,
+        'path_type': path_type,
+        'p_depth': p_depth,
         'r_type': r_type,
         'r_properties': r_properties,
         'conditions': conditions,
@@ -87,7 +91,7 @@ def _line_update():
 
 
 def _upload_file():
-    df = pd.DataFrame(columns=['a_label', 'a_properties', 'b_label', 'r_type', 'r_properties', 'conditions', 'output'])
+    df = pd.DataFrame(columns=['a_label', 'a_properties', 'b_label', 'path_type', 'p_depth', 'r_type', 'r_properties', 'conditions', 'output'])
     file = st.file_uploader("上传CSV/TSV文件", type=["csv", "tsv"])
 
     if file:
@@ -108,7 +112,7 @@ def _update():
 
 
 def _match():
-    a_label, a_properties, b_label, is_r_type, r_type, r_properties, conditions = _input_template(action='M')
+    a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions = _input_template(action='M')
     output = st.multiselect('选择输出项(RETURN)', ['a: Start node', 'b: End node', 'r: Relationship'])
     st.markdown('*[请至少选择一个输出项，输出项留空时默认输出所有元素]*')
     output = ','.join([o[0] for o in output])
@@ -118,7 +122,8 @@ def _match():
         'a_label': a_label,
         'a_properties': a_properties,
         'b_label': b_label,
-        'is_r_type': is_r_type,
+        'path_type': path_type,
+        'p_depth': p_depth,
         'r_type': r_type,
         'r_properties': r_properties,
         'conditions': conditions,
@@ -132,7 +137,7 @@ def _match():
     if _submit:
         try:
             result = seeker.get_sres_by_cypher(_cypher)
-            st.write(result)
+            st.json(result)
         except Exception as Err:
             st.warning(Err)
 

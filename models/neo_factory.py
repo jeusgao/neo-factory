@@ -51,12 +51,12 @@ def init_load_csv(fpath, label, index):
     return f'CSV file {fpath} imported as User Nodes.'
 
 
-def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
+def _a_r_b(a_label, path_type, p_depth, r_type, b_label, conditions, output):
     '''[Cypher scripts initiate]
     [Build a initiative cypher scripts]
     Arguments:
         a_label {[str]} -- [Start node label]
-        is_r_type {bool} -- [Is need relationship or not]
+        path_type {Str} -- [path finder type]
         r_type {[str]} -- [The relationship type]
         b_label {[str]} -- [End node label]
         conditions {[str]} -- [where conditions]
@@ -66,7 +66,7 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
     '''
     cy = f"MATCH (a:{a_label})"
     if output not in ['CREATE_RELATIONSHIP']:
-        if is_r_type in ['Y']:
+        if path_type in ['RELATION']:
             if r_type:
                 cy += f'-[r:{r_type}]-'
             else:
@@ -75,13 +75,23 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
                 cy += f"(b:{b_label})"
             else:
                 cy += '(b)'
-        else:
+        elif path_type in ['NONE']:
             if b_label:
                 cy += f",(b:{b_label})"
-
+        elif path_type in ['Shortest']:
+            cy = f"match p=shortestPath((a:{a_label})-[*..{p_depth}]-(b:{b_label})"
+            cy += ")"
+            if conditions:
+                cy += f" where {conditions}"
+            return cy
+        elif path_type in ['AllShortests']:
+            cy = f"match p=allShortestPaths((a:{a_label})-[*..{p_depth}]-(b:{b_label})"
+            cy += ")"
+            if conditions:
+                cy += f" where {conditions}"
+            return cy
     if conditions:
         cy += f" WHERE {conditions}"
-
     return cy
 
 
@@ -100,13 +110,15 @@ def build_cypher(r, action='U'):
     a_properties = None if not r.a_properties or not isinstance(r.a_properties, str) and math.isnan(r.a_properties) else r.a_properties
     b_label = None if not r.b_label or not isinstance(r.b_label, str) and math.isnan(r.b_label) else r.b_label
     conditions = None if not r.conditions or not isinstance(r.conditions, str) and math.isnan(r.conditions) else r.conditions
-    is_r_type = None if not r.is_r_type or not isinstance(r.is_r_type, str) and math.isnan(r.is_r_type) else r.is_r_type
+    path_type = None if not r.path_type or not isinstance(r.path_type, str) and math.isnan(r.path_type) else r.path_type
+    p_depth = 1 if math.isnan(r.p_depth) else r.p_depth
     r_type = None if not r.r_type or not isinstance(r.r_type, str) and math.isnan(r.r_type) else r.r_type
     r_properties = None if not r.r_properties or not isinstance(r.r_properties, str) and math.isnan(r.r_properties) else r.r_properties
 
     _cy = _a_r_b(
         a_label,
-        is_r_type,
+        path_type,
+        p_depth,
         r_type,
         b_label,
         conditions,
@@ -387,6 +399,21 @@ class NeoSeeker(TransBase):
                             'labels': list(v.labels),
                             'properties': dict(v),
                         })
+                    elif _type in ['Path']:
+                        for p in walk(v):
+                            _p_type = get_name(p)
+                            if _p_type in ['Node']:
+                                rs.append({
+                                    'type': 'Node',
+                                    'labels': list(p.labels),
+                                    'properties': dict(p),
+                                })
+                            else:
+                                rs.append({
+                                    'type': 'Relationship',
+                                    'labels': _p_type,
+                                    'properties': dict(p),
+                                })
                     else:
                         rs.append({
                             'type': 'Relationship',

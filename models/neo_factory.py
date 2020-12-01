@@ -4,6 +4,7 @@
 # @Author  : Joe Gao (jeusgao@163.com)
 
 import math
+import json
 from utils import get_name, get_property
 from py2neo import (
     Graph,
@@ -21,7 +22,9 @@ from py2neo.matching import (
     RelationshipMatch,
 )
 
-g = Graph(password="joe")
+with open('config.json', 'r') as f:
+    conf = json.load(f)
+g = Graph(conf.get('graph_base'), password=conf.get('password'))
 
 
 def init_load_csv(fpath, label, index):

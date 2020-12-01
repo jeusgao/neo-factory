@@ -68,7 +68,7 @@ def _a_r_b(a_label, is_r_type, r_type, b_label, conditions, output):
     if r_type and output not in ['CREATE_RELATIONSHIP']:
         cy += f'-[r:{r_type}]-'
     if b_label:
-        if is_r_type in ['Y']:
+        if is_r_type in ['Y'] and not r_type:
             cy += '-[r]-'
         else:
             cy += ','

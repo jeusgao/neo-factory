@@ -143,7 +143,7 @@ def _match():
 
 
 def runner(title=''):
-    _task_type = st.sidebar.selectbox('Select cypher task:', ('Update', 'Match'))
+    _task_type = st.sidebar.radio('Select cypher task:', ('Match', 'Update'))
     st.success(f'{title} - {_task_type}')
     if _task_type == 'Update':
         _update()

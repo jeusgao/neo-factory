@@ -6,8 +6,8 @@
 # @Version : $Id$
 
 import os
-from apps import org
+from apps import cypher_api
 
 if __name__ == '__main__':
     # if is_login('admin'):
-    org.main()
+    cypher_api.main()

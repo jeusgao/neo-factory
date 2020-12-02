@@ -131,7 +131,7 @@ def _match():
     }, index=[0])
 
     _cypher = build_cypher(list(df.iterrows())[0][1], action='M')
-    st.text(f'!!!match BOOM!!! {_cypher}')
+    st.markdown('#### !!! Cypher BOOM !!! * Check cypher scripts below, copy or run it. *' + '\n\n\t' + _cypher)
 
     _submit = st.button('RUN')
     if _submit:

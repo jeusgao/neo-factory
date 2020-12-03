@@ -19,7 +19,6 @@ def _update_commit(df):
     if len(df):
         for r in df.iterrows():
             _cypher = build_cypher(r[1])
-            st.text(f'!!!BOOM!!! \t{_cypher}')
             g.run(_cypher)
 
 
@@ -52,7 +51,7 @@ def _input_template(action='U'):
             "{R_NAME:'部门成员', R_SORT:10}")
     conditions = st.text_input('Where conditions:')
     st.markdown(
-        'a.key=avalue [and|or|>|<|contains ...] a.key2=b.value2...  *[value 如果是静态值需要用单引号引起来]*' +
+        'a.key = value [ and | or | > | < | contains ...] a.key2 = b.value2...  *[value 如果是静态值需要用单引号引起来]*' +
         '\n\n\t' +
         "(a.USER_LOGIN_NAME='gaojinsong00' or a.USER_NAME contains '高') and b.DEPT_CODE='LR021201'")
 
@@ -63,47 +62,55 @@ def _input_template(action='U'):
     return a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions
 
 
-def _line_update():
-    a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions = _input_template()
+def _update():
 
-    output = st.selectbox('Return command', list(NEO_FIELDS.Outputs.keys()))
-    output_param = st.text_input('command params:').replace(output, '')
+    def _line_update():
+        a_label, a_properties, b_label, path_type, p_depth, r_type, r_properties, conditions = _input_template()
 
-    st.markdown(NEO_FIELDS.Outputs.get(output), unsafe_allow_html=False)
+        output = st.selectbox('Return command', list(NEO_FIELDS.Outputs.keys())).strip()
+        output_param = ''
+        if '@' in output:
+            output_param = st.text_input('command params:').replace(output, '')
 
-    df = pd.DataFrame({
-        'a_label': a_label,
-        'a_properties': a_properties,
-        'b_label': b_label,
-        'path_type': path_type,
-        'p_depth': p_depth,
-        'r_type': r_type,
-        'r_properties': r_properties,
-        'conditions': conditions,
-        'output': f'{output} {output_param}'
-    }, index=[0])
-    table = st.dataframe(df)
+        st.markdown(NEO_FIELDS.Outputs.get(output), unsafe_allow_html=False)
 
-    _submit = st.button('Commit')
-
-    if _submit and a_label:
-        _update_commit(df)
-
-
-def _upload_file():
-    df = pd.DataFrame(columns=['a_label', 'a_properties', 'b_label', 'path_type', 'p_depth', 'r_type', 'r_properties', 'conditions', 'output'])
-    file = st.file_uploader("上传CSV/TSV文件", type=["csv", "tsv"])
-
-    if file:
-        df = pd.read_csv(file)
+        df = pd.DataFrame({
+            'a_label': a_label,
+            'a_properties': a_properties,
+            'b_label': b_label,
+            'path_type': path_type,
+            'p_depth': p_depth,
+            'r_type': r_type,
+            'r_properties': r_properties,
+            'conditions': conditions,
+            'output': f'{output} {output_param}'
+        }, index=[0])
         table = st.dataframe(df)
 
-    _submit = st.button('Commit')
-    if _submit and file:
-        _update_commit(df)
+        _submit = st.button('Commit')
 
+        _cypher = build_cypher(list(df.iterrows())[0][1])
+        st.markdown(
+            '#### $\color{#1E90FF}{!!! Cypher BOOM !!! }$ *Check your cypher scripts below, copy or run it.*' +
+            '\n\n\t' +
+            f'{_cypher}'
+        )
 
-def _update():
+        if _submit and a_label:
+            g.run(_cypher)
+
+    def _upload_file():
+        df = pd.DataFrame(columns=['a_label', 'a_properties', 'b_label', 'path_type', 'p_depth', 'r_type', 'r_properties', 'conditions', 'output'])
+        file = st.file_uploader("上传CSV/TSV文件", type=["csv", "tsv"])
+
+        if file:
+            df = pd.read_csv(file)
+            table = st.dataframe(df)
+
+        _submit = st.button('Commit')
+        if _submit and file:
+            _update_commit(df)
+
     _way = st.radio('Update way:', ('Batch input', 'Line input'))
     if _way == 'Batch input':
         _upload_file()
@@ -116,7 +123,7 @@ def _match():
     output = st.multiselect('选择输出项(RETURN)', ['a: Start node', 'b: End node', 'r: Relationship'])
     st.markdown('*[输出项可多选，留空时默认输出所有元素]*')
     output = ','.join([o[0] for o in output])
-    output = output if output else '*'
+    output = output.strip() if output else '*'
 
     df = pd.DataFrame({
         'a_label': a_label,
@@ -131,9 +138,11 @@ def _match():
     }, index=[0])
 
     _cypher = build_cypher(list(df.iterrows())[0][1], action='M')
-    st.markdown('#### $\color{#1E90FF}{!!! Cypher BOOM !!! }$ *Check your cypher scripts below, copy or run it.*' +
-                '\n\n\t' +
-                _cypher)
+    st.markdown(
+        '#### $\color{#1E90FF}{!!! Cypher BOOM !!! }$ *Check your cypher scripts below, copy or run it.*' +
+        '\n\n\t' +
+        f'{_cypher}'
+    )
 
     _submit = st.button('RUN')
     if _submit:

@@ -57,6 +57,7 @@ def _a_r_b(a_label, path_type, p_depth, r_type, b_label, conditions, output):
     Arguments:
         a_label {[str]} -- [Start node label]
         path_type {Str} -- [path finder type]
+        p_depth {int} -- [path depth to search]
         r_type {[str]} -- [The relationship type]
         b_label {[str]} -- [End node label]
         conditions {[str]} -- [where conditions]
@@ -64,7 +65,11 @@ def _a_r_b(a_label, path_type, p_depth, r_type, b_label, conditions, output):
     Returns:
         [str] -- [return a initiative cypher scripts before the return]
     '''
-    cy = f"MATCH (a:{a_label})"
+
+    if a_label:
+        cy = f"MATCH (a:{a_label})"
+    else:
+        cy = 'MATCH (a)'
     if output not in ['CREATE_RELATIONSHIP']:
         if path_type in ['RELATION']:
             if r_type:
@@ -126,13 +131,16 @@ def build_cypher(r, action='U'):
     )
 
     if action == 'U':
-        if output == 'CREATE_NODE':
-            _cy = f"CREATE ({a_label}{a_properties})"
+        if 'CREATE_NODE' in output:
+            _cy = f"CREATE (:{a_label}"
+            if a_properties:
+                _cy += f"{a_properties}"
+            _cy += ')'
         else:
-            if output == 'CREATE_RELATIONSHIP':
+            if 'CREATE_RELATIONSHIP' in output:
                 _cy += f" CREATE (a)-[:{r_type}{r_properties}]->(b)"
             elif output.startswith('@'):
-                _cy += output[1:]
+                _cy += f' {output[1:]}'
             else:
                 _cy += f' RETURN {output}'
 
@@ -420,7 +428,6 @@ class NeoSeeker(TransBase):
                             'labels': _type,
                             'properties': dict(v),
                         })
-
         except Exception as Err:
             return Err
         return rs

@@ -15,13 +15,6 @@ from models import g, build_cypher, NeoSeeker
 seeker = NeoSeeker()
 
 
-def _update_commit(df):
-    if len(df):
-        for r in df.iterrows():
-            _cypher = build_cypher(r[1])
-            g.run(_cypher)
-
-
 def _input_template(action='U'):
     # a_label = st.selectbox('Start node label:', list(NEO_FIELDS.Node_labels))
     a_label = st.text_input('Start node(Node A) label:')
@@ -109,7 +102,10 @@ def _update():
 
         _submit = st.button('Commit')
         if _submit and file:
-            _update_commit(df)
+            if len(df):
+                for r in df.iterrows():
+                    _cypher = build_cypher(r[1])
+                    g.run(_cypher)
 
     _way = st.radio('Update way:', ('Batch input', 'Line input'))
     if _way == 'Batch input':

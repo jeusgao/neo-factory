@@ -26,14 +26,14 @@
 
 
 ### Add a relationship
-	MATCH (n:User {USER_LOGIN_NAME:'dengxiaoning'})-[r]-(p) RETURN n,r,p
+	MATCH (n:User {USER_NAME:'Samzhang'})-[r]-(p) RETURN n,r,p
 	MATCH (n:User) where n.USER_POST=~'副总裁.*' RETURN n
 	MATCH (u:User),(d:Dept) WHERE u.DEPT_CODE = d.DEPT_CODE CREATE (u)-[:MEMBER_OF]->(d)
 
 ### Modify a relationship
 	[separate(delete) relationship from subgraph first, then re-add a new relationship.]
 	g.separate(relation)
-	_q = "MATCH (u:User),(d:Dept) WHERE u.USER_LOGIN_NAME = 'dengxiaoning' AND d.DEPT_CODE='LR040201' CREATE (u)-[:Leaderof {ref:'兼任总经理'}]->(d)"
+	_q = "MATCH (u:User),(d:Dept) WHERE u.USER_NAME = 'Samzhang' AND d.DEPT_CODE='00001' CREATE (u)-[:Leaderof {ref:'兼任总经理'}]->(d)"
 	g.run(_q)
 
 ### Create a index
@@ -41,10 +41,10 @@
 
 ### Import from csv
 	_query = [
-	    "CREATE (c:Company {CMPY_NAME:'联仁健康', CMPY_CODE:'ruaho'})",
-	    'LOAD CSV WITH HEADERS FROM "file:/lr/USER.csv" AS row CREATE (n:User) SET n = row',
-	    'LOAD CSV WITH HEADERS FROM "file:/lr/DEPT.csv" AS row CREATE (n:Dept) SET n = row',
-	    'CREATE INDEX ON :User(USER_LOGIN_NAME)',
+	    "CREATE (c:Company {CMPY_NAME:'JOE Corp', CMPY_CODE:'JOE_CORP'})",
+	    'LOAD CSV WITH HEADERS FROM "file:/data/USER.csv" AS row CREATE (n:User) SET n = row',
+	    'LOAD CSV WITH HEADERS FROM "file:/data/DEPT.csv" AS row CREATE (n:Dept) SET n = row',
+	    'CREATE INDEX ON :User(USER_NAME)',
 	    'CREATE INDEX ON :Dept(DEPT_CODE)',
 	    'MATCH (u:User),(d:Dept) WHERE u.DEPT_CODE = d.DEPT_CODE CREATE (u)-[:MEMBER_OF]->(d)',
 	    'MATCH (d:Dept),(c:Company) WHERE d.DEPT_PCODE = c.CMPY_CODE CREATE (d)-[:SUB_OF]->(c)',
@@ -60,12 +60,12 @@ a_label|a_properties|b_label|r_type|r_properties|conditions|output
 a:User|{key:'value'}|b:Dept|r:IN_CHARGE_OF|{ref:'兼任总经理'}|a.key=value and b.key=value|output参考模板说明
 
 # 模板说明：
-## conditions: 
+## conditions:
 ***value 一定要用单引号引起来***
-*例如：a.USER_LOGIN_NAME='gaojinsong00' and b.DEPT_CODE='LR021201'*
+*例如：a.USER_NAME='Samzhang' and b.DEPT_CODE='00001'*
 
-## output: 
-### Search: 
+## output:
+### Search:
 ***直接输入要return的元素(a,b,r之一或多)***
 ```
 a,r,b
@@ -73,7 +73,7 @@ a,r,b
 
 ### Node update
 #### Node(s):
-##### 创建Node: 
+##### 创建Node:
 ***创建Node时只需要填写a_label和a_properties，a_properties样例: {a:'b', c:'d'}***
 ```
 CREAT_NODE
@@ -117,7 +117,7 @@ CREAT_NODE
 ```
 
 ### Relationship update:
-##### Create: 
+##### Create:
 ***创建关系时 a, b 两个Node都需要定义，可以是相同label，根据where条件设置可以创建多对Nodes的关系***
 ```
 CREATE_RELATIONSHIP

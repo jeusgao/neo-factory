@@ -1,4 +1,5 @@
 # NeoFactory
+Run GUI with streamlit: streamlit run app.py --server.port=PORT
 
 ## init_load_csv(fpath, label, index)
 ## build_cypher
